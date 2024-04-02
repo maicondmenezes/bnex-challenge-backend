@@ -35,4 +35,4 @@ jobs:
       run: poetry install
 
     - name: Run Tests
-      run: task test
+      run: poetry run task test
