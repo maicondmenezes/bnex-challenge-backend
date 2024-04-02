@@ -1,0 +1,138 @@
+name: Integration Tests
+
+on:
+  workflow_run:
+    workflows:
+      - Unit Tests
+    branches: ["master", "develop"]
+    types:
+      - completed
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+
+      - name: Install pipx
+        run: python -m pip install pipx
+
+      - name: Ensure pipx binary path is on PATH
+        run: echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Install Poetry with pipx
+        run: pipx install poetry
+
+      - name: Install Dependencies
+        run: poetry install
+
+      - name: Run Unit Tests
+        run: poetry run task test
+
+      - name: Create SuperUser
+        run: echo "from django.contrib.auth.models import User; User.objects.create_superuser('admin', 'admin@example.com', 'admin')" | poetry run python core/manage.py shell
+
+      - name: Start Django server
+        run: |
+          poetry run task runserver &
+          echo "Server started"
+
+      - name: Wait for server to start
+        run: |
+          until curl --output /dev/null --silent --head --fail http://localhost:8000/api; do
+            printf '.'
+            sleep 1
+          done
+          echo "Server is ready for integration tests"
+
+      - name: Test admin endpoint
+        run: curl --fail http://localhost:8000/admin/
+
+      - name: Test api root
+        run: curl --fail http://localhost:8000/api/
+
+      - name: Test schema endpoint
+        run: curl --fail http://localhost:8000/api/schema/
+      
+      - name: Test docs (Swagger) endpoint
+        run: curl --fail http://localhost:8000/api/docs/swagger/
+
+      - name: Test no authenticated request to users endpoint
+        run: |
+          status_code=$(curl -s -o /dev/null -w '%{http_code}' http://localhost:8000/api/users/)
+          if [ "$status_code" -ne 401 ]; then
+            echo "Expected HTTP 401 error, but got HTTP status code: $status_code"
+            exit 1
+          fi
+
+      - name: Test no authenticated request to products endpoint
+        run: |
+          status_code=$(curl -s -o /dev/null -w '%{http_code}' http://localhost:8000/api/products/)
+          if [ "$status_code" -ne 401 ]; then
+            echo "Expected HTTP 401 error, but got HTTP status code: $status_code"
+            exit 1
+          fi
+
+      - name: Get auth token
+        run: |
+          token=$(curl -s -X POST -d "username=admin&password=admin" http://localhost:8000/api/auth/token/ | jq -r '.token')
+
+          if [ -z "$token" ] || [ "$token" = "null" ]; then
+            echo "Token not received or invalid."
+            exit 1
+          else
+            echo "Get Valid Token: $token"
+            echo "AUTH_TOKEN=${token}" >> $GITHUB_ENV
+          fi
+      
+      - name: Test create product (POST)
+        run: |
+          response=$(curl --fail -H "Authorization: Token $AUTH_TOKEN" -H "Content-Type: application/json" -X POST -d '{"name": "Test Product", "description": "Test Description", "value": "10.99"}' http://localhost:8000/api/products/)
+          
+          if [ "$response" | jq -r '.name' != "Test Product" ]; then
+            echo "Product not created"
+            exit 1
+          fi
+
+
+      - name: Test products list (GET)
+        run: |
+          response=$(curl --fail -H "Authorization: Token $AUTH_TOKEN" http://localhost:8000/api/products/)
+          
+          if [ "$response" | jq -r '.results' | jq 'length' -ne 1 ]; then
+            echo "Expected 1 product, but got $(echo $response | jq -r '.results' | jq 'length')"
+            exit 1
+          fi
+      
+      - name: Test update product (PUT)
+        run: |
+          response=$(curl --fail -H "Authorization: Token $AUTH_TOKEN" -X PUT -d '{"name": "Updated Product", "description": "Updated Description", "value": "11.99"}' -H "Content-Type: application/json" http://localhost:8000/api/products/1/)
+
+          if [ "$response" | jq -r '.name' != "Updated Product" ]; then
+            echo "Product not updated"
+            exit 1
+          fi
+      
+      - name: Test partial update product (PATCH)
+        run: |
+          response=$(curl --fail -H "Authorization: Token $AUTH_TOKEN" -X PATCH -d '{"name": "Partially Updated Product"}' -H "Content-Type: application/json" http://localhost:8000/api/products/1/)
+
+          if [ "$response" | jq -r '.name' != "Partially Updated Product" ]; then
+            echo "Product not partially updated"
+            exit 1
+          fi
+      
+      - name: Test delete product (DELETE)
+        run: |
+          delete_status_code=$(curl --fail -w "%{http_code}" -H "Authorization: Token $AUTH_TOKEN" -X DELETE http://localhost:8000/api/products/1/)
+          get_response=$(curl --fail -H "Authorization: Token $AUTH_TOKEN" http://localhost:8000/api/products/)
+
+          if [ "$delete_status_code" -ne 204 ] || [ "$get_response" | jq -r '.results' | jq 'length' -ne 0 ]; then
+            echo "Product not deleted"
+            exit 1
+          fi
