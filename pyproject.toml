@@ -4,6 +4,7 @@ version = "0.1.0"
 description = ""
 authors = ["Maicon de Menezes <maicondmenezes@gmail.com>"]
 readme = "README.md"
+package-mode = false
 
 [tool.poetry.dependencies]
 python = "^3.11"
@@ -44,5 +45,5 @@ post_test = "coverage html"
 runserver = "python core/manage.py runserver"
 makemigrations = "python core/manage.py makemigrations"
 migrate = "python core/manage.py migrate"
-createsuperuser = "python manage.py createsuperuser"
+createsuperuser = "python core/manage.py createsuperuser"
 

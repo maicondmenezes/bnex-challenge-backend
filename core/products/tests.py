@@ -1,5 +1,7 @@
+from django.contrib.auth.models import User
 from django.urls import reverse
 from rest_framework import status
+from rest_framework.authtoken.models import Token
 from rest_framework.test import APITestCase
 
 from .models import Product
@@ -7,13 +9,22 @@ from .models import Product
 
 class ProductAPITestCase(APITestCase):
     def setUp(self):
-        # Create a product to be used in get, update, and delete tests
+        self.user = User.objects.create_user(
+            username='admin', password='admin', email='admin@admin.com'
+        )
+        token, created = Token.objects.get_or_create(user=self.user)
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+
         self.product = Product.objects.create(
             name='Test Product', description='Test Description', value='99.99'
         )
         self.product_url = reverse(
             'product-detail', kwargs={'pk': self.product.pk}
         )
+
+    def tearDown(self):
+        self.user.delete()
+        super().tearDown()
 
     def test_create_product(self):
         """
