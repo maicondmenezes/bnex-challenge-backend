@@ -28,8 +28,8 @@ Follow these instructions to set up the project locally for development and test
 1. **Clone the Repository**
 
     ```bash
-    git clone https://your-repository-url.git
-    cd your-repository-directory
+    git clone https://github.com/maicondmenezes/bnex-challenge-backend.git
+    cd bnex-challenge-backend
     ```
 
 2. **Setup Environment**
