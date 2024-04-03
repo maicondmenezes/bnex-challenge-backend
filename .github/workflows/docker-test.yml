@@ -16,6 +16,17 @@ jobs:
 
       - name: Build and Start the Docker containers
         run: docker-compose up --build -d
+        env:
+          DB_NAME: dbname
+          DB_USER: user
+          DB_PASSWORD: password
+          DB_PORT: 5432
+          DJANGO_SUPERUSER_USERNAME: admin
+          DJANGO_SUPERUSER_PASSWORD: adminpassword
+          DJANGO_SUPERUSER_EMAIL: admin@example.com
+          SECRET_KEY: your_secret_key
+          ALLOWED_HOSTS: '*'
+          DEBUG: 'True'
       
       - name: Check if container is healthy
         run: docker-compose ps
