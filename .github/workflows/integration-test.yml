@@ -94,14 +94,14 @@ jobs:
           fi
       
       - name: Test create product (POST)
-      run: |
-        response=$(curl --fail -H "Authorization: Token $AUTH_TOKEN" -H "Content-Type: application/json" -X POST -d '{"name": "Test Product", "description": "Test Description", "value": "10.99"}' http://localhost:8000/api/products/)
-        
-        product_name=$(echo "$response" | jq -r ".name")
-        if [ "$product_name" != "Test Product" ]; then
-          echo "Product not created"
-          exit 1
-        fi
+        run: |
+          response=$(curl --fail -H "Authorization: Token $AUTH_TOKEN" -H "Content-Type: application/json" -X POST -d '{"name": "Test Product", "description": "Test Description", "value": "10.99"}' http://localhost:8000/api/products/)
+          
+          product_name=$(echo "$response" | jq -r ".name")
+          if [ "$product_name" != "Test Product" ]; then
+            echo "Product not created"
+            exit 1
+          fi
 
       - name: Test products list (GET)
         run: |
