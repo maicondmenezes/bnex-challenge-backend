@@ -18,9 +18,7 @@ jobs:
         run: docker-compose up --build -d
       
       - name: Check if container is healthy
-        run: |
-          docker-compose ps
-          docker-compose logs
+        run: docker-compose ps
       
       - name: Wait for container to be ready
         uses: jakejarvis/wait-action@master
