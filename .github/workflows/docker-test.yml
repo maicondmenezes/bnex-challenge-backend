@@ -14,12 +14,6 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
-
-      - name: Set up Docker Compose
-        uses: docker/setup-compose-action@v1
-
       - name: Build and Start the Docker containers
         run: docker-compose up --build -d
       
@@ -32,4 +26,7 @@ jobs:
           time: '10s'
 
       - name: Wait for server to start
-        run: curl --fail http://0.0.0.0:8000/api
+        run: curl -s --fail http://0.0.0.0:8000/api > /dev/null
+
+      - name: Shut down the Docker containers
+        run: docker-compose down
