@@ -138,8 +138,8 @@ jobs:
           delete_status_code=$(curl --fail -w "%{http_code}" -H "Authorization: Token $AUTH_TOKEN" -X DELETE http://localhost:8000/api/products/1/)
           get_response=$(curl --fail -H "Authorization: Token $AUTH_TOKEN" http://localhost:8000/api/products/)
 
-          products_count=$(echo "$get_response" | jq ".results | length")
-          if [ "$delete_status_code" -ne 204 ] || [ "$products_count -"ne 0 ]; then
+          product_count=$(echo "$get_response" | jq ".results | length")
+          if [ "$delete_status_code" -ne 204 ] || [ "$product_count" -ne 0 ]; then
             echo "Product not deleted"
             exit 1
           fi
