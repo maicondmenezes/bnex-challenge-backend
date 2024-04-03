@@ -62,13 +62,14 @@ jobs:
           poetry config virtualenvs.create true
           poetry install
           
-      - name: Wait for Postgres to become 
+      - name: Wait for Postgres to become ready
         run: |
-          until pg_isready -h localhost -p ${{ env.DB_PORT }} -U ${{ env.DB_USER}}; do
-            echo "Waiting for postgres..."
+          until pg_isready -h ${{ env.DB_HOST }} -p ${{ env.DB_PORT }} -U ${{ env.DB_USER }}; do
+            echo "Waiting for Postgres..."
             sleep 2
           done
           echo "Postgres is ready"
+
       
       - name: Run Migrations
         run: poetry run task makemigrations && poetry run task migrate
