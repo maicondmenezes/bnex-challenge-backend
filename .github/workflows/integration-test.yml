@@ -97,7 +97,7 @@ jobs:
         run: |
           response=$(curl --fail -H "Authorization: Token $AUTH_TOKEN" -H "Content-Type: application/json" -X POST -d '{"name": "Test Product", "description": "Test Description", "value": "10.99"}' http://localhost:8000/api/products/)
           
-          if [ "$response" | jq -r '.name' != "Test Product" ]; then
+          if [ "$response" | jq -r ".name" != "Test Product" ]; then
             echo "Product not created"
             exit 1
           fi
@@ -107,8 +107,8 @@ jobs:
         run: |
           response=$(curl --fail -H "Authorization: Token $AUTH_TOKEN" http://localhost:8000/api/products/)
           
-          if [ "$response" | jq -r '.results' | jq 'length' -ne 1 ]; then
-            echo "Expected 1 product, but got $(echo $response | jq -r '.results' | jq 'length')"
+          if [ "$response" | jq -r ".results" | jq "length" -ne 1 ]; then
+            echo "Expected 1 product, but got $(echo $response | jq -r ".results" | jq "length")"
             exit 1
           fi
       
@@ -116,7 +116,7 @@ jobs:
         run: |
           response=$(curl --fail -H "Authorization: Token $AUTH_TOKEN" -X PUT -d '{"name": "Updated Product", "description": "Updated Description", "value": "11.99"}' -H "Content-Type: application/json" http://localhost:8000/api/products/1/)
 
-          if [ "$response" | jq -r '.name' != "Updated Product" ]; then
+          if [ "$response" | jq -r ".name" != "Updated Product" ]; then
             echo "Product not updated"
             exit 1
           fi
@@ -125,7 +125,7 @@ jobs:
         run: |
           response=$(curl --fail -H "Authorization: Token $AUTH_TOKEN" -X PATCH -d '{"name": "Partially Updated Product"}' -H "Content-Type: application/json" http://localhost:8000/api/products/1/)
 
-          if [ "$response" | jq -r '.name' != "Partially Updated Product" ]; then
+          if [ "$response" | jq -r ".name" != "Partially Updated Product" ]; then
             echo "Product not partially updated"
             exit 1
           fi
@@ -135,7 +135,7 @@ jobs:
           delete_status_code=$(curl --fail -w "%{http_code}" -H "Authorization: Token $AUTH_TOKEN" -X DELETE http://localhost:8000/api/products/1/)
           get_response=$(curl --fail -H "Authorization: Token $AUTH_TOKEN" http://localhost:8000/api/products/)
 
-          if [ "$delete_status_code" -ne 204 ] || [ "$get_response" | jq -r '.results' | jq 'length' -ne 0 ]; then
+          if [ "$delete_status_code" -ne 204 ] || [ "$get_response" | jq -r ".results" | jq "length" -ne 0 ]; then
             echo "Product not deleted"
             exit 1
           fi
