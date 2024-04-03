@@ -127,6 +127,7 @@ jobs:
         run: |
           response=$(curl --fail -H "Authorization: Token $AUTH_TOKEN" -X PATCH -d '{"name": "Partially Updated Product"}' -H "Content-Type: application/json" http://localhost:8000/api/products/1/)
 
+          patched_product=$(echo "$response" | jq -r ".name")        
           if [ "$patched_product" != "Partially Updated Product" ]; then
             echo "Product not partially updated"
             exit 1
