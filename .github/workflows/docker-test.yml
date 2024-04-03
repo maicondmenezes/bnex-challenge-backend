@@ -6,6 +6,20 @@ on:
     branches: ["master", "develop"]
     types:
       - completed
+
+env:
+  DJANGO_SUPERUSER_USERNAME: admin
+  DJANGO_SUPERUSER_PASSWORD: admin
+  DJANGO_SUPERUSER_EMAIL: admin@admin.com
+  SECRET_KEY: django-insecure-*un^z^n1=hw(_c=4y3o65&i5sta%frz+s#53pqcopnisbn^2v-
+  ALLOWED_HOSTS: "*"
+  DEBUG: True
+  DB_NAME: dbname
+  DB_USER: user
+  DB_PASSWORD: password
+  DB_PORT: 5432
+  DB_HOST: localhost
+
 jobs:
   docker-compose-up:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
@@ -16,18 +30,7 @@ jobs:
 
       - name: Build and Start the Docker containers
         run: docker-compose up --build -d
-        env:
-          DB_NAME: dbname
-          DB_USER: user
-          DB_PASSWORD: password
-          DB_PORT: 5432
-          DJANGO_SUPERUSER_USERNAME: admin
-          DJANGO_SUPERUSER_PASSWORD: adminpassword
-          DJANGO_SUPERUSER_EMAIL: admin@example.com
-          SECRET_KEY: your_secret_key
-          ALLOWED_HOSTS: '*'
-          DEBUG: 'True'
-      
+              
       - name: Check if container is healthy
         run: docker-compose ps
       
