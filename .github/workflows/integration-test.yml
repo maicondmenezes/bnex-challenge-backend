@@ -34,6 +34,9 @@ jobs:
       - name: Run Unit Tests
         run: poetry run task test || true
 
+      - name: Run Migrations
+        run: poetry run task makemigrations && poetry run task migrate
+
       - name: Create SuperUser
         run: echo "from django.contrib.auth.models import User; User.objects.create_superuser('admin', 'admin@example.com', 'admin')" | poetry run python core/manage.py shell
 
