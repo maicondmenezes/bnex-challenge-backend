@@ -7,8 +7,13 @@ services:
       - "8000:8000"
     volumes:
       - .:/usr/src/app    
-    env_file:
-      - .env
+    environment:
+      DJANGO_SUPERUSER_USERNAME: "admin"
+      DJANGO_SUPERUSER_PASSWORD: "admin"
+      DJANGO_SUPERUSER_EMAIL: "admin@admin.com"
+      SECRET_KEY: "django-insecure-*un^z^n1=hw(_c=4y3o65&i5sta%frz+s#53pqcopnisbn^2v-"
+      ALLOWED_HOSTS: "*"
+      DEBUG: "True"
 
 volumes:
   data:
