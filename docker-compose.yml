@@ -1,19 +1,39 @@
 version: '3.8'
 
 services:
+  backend_db:
+    image: postgres:13
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    env_file:
+      - .env
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "5433:${DB_PORT}"
+
   backend:
     build: .
     ports:
       - "8000:8000"
     volumes:
-      - .:/usr/src/app    
+      - .:/usr/src/app
+    depends_on:
+      - backend_db
     environment:
-      DJANGO_SUPERUSER_USERNAME: "admin"
-      DJANGO_SUPERUSER_PASSWORD: "admin"
-      DJANGO_SUPERUSER_EMAIL: "admin@admin.com"
-      SECRET_KEY: "django-insecure-*un^z^n1=hw(_c=4y3o65&i5sta%frz+s#53pqcopnisbn^2v-"
-      ALLOWED_HOSTS: "*"
-      DEBUG: "True"
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_HOST: backend_db
+      DB_PORT: ${DB_PORT}
+      DJANGO_SUPERUSER_USERNAME: ${DJANGO_SUPERUSER_USERNAME}
+      DJANGO_SUPERUSER_PASSWORD: ${DJANGO_SUPERUSER_PASSWORD}
+      DJANGO_SUPERUSER_EMAIL: ${DJANGO_SUPERUSER_EMAIL}
+      SECRET_KEY: ${SECRET_KEY}
+      ALLOWED_HOSTS: ${ALLOWED_HOSTS}
+      DEBUG: ${DEBUG}
 
 volumes:
-  data:
+  postgres_data:
