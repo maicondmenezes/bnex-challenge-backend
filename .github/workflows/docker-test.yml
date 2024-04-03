@@ -28,19 +28,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Print environment variables for debugging
-        run: |
-          echo "DB_NAME=${DB_NAME}"
-          echo "DB_PORT=${DB_PORT}"
-          echo "DB_USER=${DB_USER}"
-          echo "DB_PASSWORD=${DB_PASSWORD}"
-          echo "DB_HOST=${DB_HOST}"
-          echo "SECRET_KEY=${SECRET_KEY}"
-          echo "ALLOWED_HOSTS=${ALLOWED_HOSTS}"
-          echo "DEBUG=${DEBUG}"
-          echo "DJANGO_SUPERUSER_USERNAME=${DJANGO_SUPERUSER_USERNAME}"
-          echo "DJANGO_SUPERUSER_PASSWORD=${DJANGO_SUPERUSER_PASSWORD}"
-          echo "DJANGO_SUPERUSER_EMAIL=${DJANGO_SUPERUSER_EMAIL}"
+      - name: Create a dummy .env file
+        run: touch .env
           
       - name: Build and Start the Docker containers
         run: docker-compose up --build -d
